@@ -1,0 +1,9 @@
+- try radon transform to show 2d reconstruction 
+
+
+- methods of 3d reconstruction - write function for different methods 
+    - min IP, maxIP, SSD, VRT, etc
+
+- how to render 3D  in opencv? 
+
+- show renderings and compare 
