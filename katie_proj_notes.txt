@@ -1,9 +1,16 @@
 - try radon transform to show 2d reconstruction 
 
+pre-processing techniques
+    - segmentation via thresholding, opening and closing, 
+
 
 - methods of 3d reconstruction - write function for different methods 
-    - min IP, maxIP, SSD, VRT, etc
+    - min IP, maxIP, SSD, VRT, GIR
 
 - how to render 3D  in opencv? 
 
 - show renderings and compare 
+
+input is slices - already hough transformed 
+output is 3d rendering of body part 
+
