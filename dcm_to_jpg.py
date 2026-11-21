@@ -1,36 +1,43 @@
-# NOT WORKING: 
 
-# import dicom2jpg
-
-
-
-# # Convert all DICOM files in a directory (uses multiprocessing by default)
-# dicom2jpg.dicom2jpg("C:/Users/kgpar/OneDrive/Documents/ee332/EE332-Final-Project/humeral1", target_root="C:/Users/kgpar/OneDrive/Documents/ee332/EE332-Final-Project/humeral1jpg", anonymous=True, force=True)
-
-
-import pydicom
-import numpy as np
-from PIL import Image
 import os
+import numpy as np
+import pydicom
+from PIL import Image
 
-input_folder = "dicom_files"
-output_folder = "jpg_files"
+INPUT_DIR = "C:/Users/kgpar/OneDrive/Documents/ee332/EE332-Final-Project/humeral1"
+OUTPUT_DIR = "C:/Users/kgpar/OneDrive/Documents/ee332/EE332-Final-Project/humeral_jpg"
 
-os.makedirs(output_folder, exist_ok=True)
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 
-for filename in os.listdir(input_folder):
-    if filename.lower().endswith(".dcm"):
-        dcm_path = os.path.join(input_folder, filename)
+for f in os.listdir(INPUT_DIR):
+    if not f.lower().endswith(".dcm"):
+        continue
 
-        ds = pydicom.dcmread(dcm_path)
-        pixel_array = ds.pixel_array.astype(float)
+    try:
+        path = os.path.join(INPUT_DIR, f)
+        ds = pydicom.dcmread(path, force=True)
 
-        # Normalize to 0-255
-        pixel_array = (np.maximum(pixel_array, 0) /
-                       pixel_array.max()) * 255.0
-        image = Image.fromarray(pixel_array.astype(np.uint8))
+        img = np.frombuffer(ds.PixelData, dtype=np.uint16)
+        img = img.reshape(ds.Rows, ds.Columns)
 
-        jpg_name = os.path.splitext(filename)[0] + ".jpg"
-        image.save(os.path.join(output_folder, jpg_name))
+        img = img.astype(np.float32)
+        img = img * float(ds.RescaleSlope) + float(ds.RescaleIntercept)
 
-print("Conversion complete.")
+        wc = float(ds.WindowCenter)
+        ww = float(ds.WindowWidth)
+
+        img = np.clip(img, wc - ww/2, wc + ww/2)
+        img = (img - (wc - ww/2)) / ww
+        img = (img * 255).astype(np.uint8)
+
+        out = os.path.join(
+            OUTPUT_DIR,
+            os.path.splitext(f)[0] + ".jpg"
+        )
+
+        Image.fromarray(img).save(out, quality=95)
+
+        print(f"Converted {f}")
+
+    except Exception as e:
+        print(f"Failed {f}: {e}")
