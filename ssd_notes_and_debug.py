@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 
 
-filepath = "C:/Users/kgpar/OneDrive/Documents/ee332/EE332-Final-Project/humeral_jpg/hum0064.jpg"
+filepath = "C:/Users/kgpar/OneDrive/Documents/ee332/EE332-Final-Project/humeral_jpg/hum0011.jpg"
 
 img = cv2.imread(filepath, cv2.IMREAD_GRAYSCALE)
 
@@ -33,7 +33,7 @@ def preprocessing(filepath, method):
         m_scaled = cv2.convertScaleAbs(magnitude)
 
         # thresholding
-        threshold = 100
+        threshold = 75
 
         edges_map = img_blur > threshold 
 
@@ -50,7 +50,13 @@ def preprocessing(filepath, method):
 # thresholding - if above certain value, count as edge, if not, make background. use opening/closing to clean it up 
 
 # try blurring image first 
-img_blur = cv2.GaussianBlur(img, (5, 5), 0)
+img_blur = cv2.GaussianBlur(img, (3,3), 0)
+
+edges = cv2.Canny(img_blur, 200, 100)
+
+cv2.imshow('canny edges', edges)
+cv2.waitKey(0) 
+cv2.destroyAllWindows()
 
 # try using sobel edge detection first
 
@@ -74,15 +80,15 @@ mag = cv2.magnitude(gradx, grady)
 mag_norm = cv2.convertScaleAbs(mag)
 
 
-cv2.imshow('roberts', mag_norm)
+cv2.imshow('sobel', m_scaled)
 cv2.waitKey(0) 
 cv2.destroyAllWindows()
 
 #try other edge finding algorithms = sobel, roberts cross etc
 
-threshold = 75
+threshold = 50
 
-edges_map = img_blur > threshold 
+edges_map = m_scaled > threshold 
 
 edges =cv2.convertScaleAbs(edges_map * 255)
 
@@ -90,9 +96,12 @@ edges =cv2.convertScaleAbs(edges_map * 255)
 kernel = np.ones([5,5])
 edges_closed = cv2.morphologyEx(edges, cv2.MORPH_CLOSE, kernel)
 
-cv2.imshow('edges', edges)
+cv2.imshow('sobel edges', edges_closed)
 cv2.waitKey(0) 
 cv2.destroyAllWindows()
+
+# literally just a threshold value
+
 
 #if img > thresh = 255, else if < thresh = 0 
 #opening and closing 
@@ -114,3 +123,26 @@ cv2.destroyAllWindows()
 # add light source 
 
 # 3d render 
+
+
+# consider using opencv SFM library (image from camera motion), turns into 3d render 
+# def volume(slices):
+
+#     # create 3D volume from set of images
+#     volume = np.stack(slices, axis=0)
+
+#     # turn into mesh, adjust first value in spacing for Z scaling 
+
+#     verts, faces, normals, values = measure.marching_cubes(volume, level=127, spacing=(1.0, 1.0, 1.0))
+
+#     # reformat mesh for renderer 
+#     faces_pv = np.hstack([np.full((faces.shape[0], 1), 3), faces]).astype(np.int64)
+#     mesh = pv.PolyData(verts, faces_pv)
+    
+#     # render
+#     plotter = pv.Plotter()
+#     plotter.add_mesh(mesh, color="ivory", smooth_shading=True)
+#     plotter.add_axes()
+#     plotter.show()
+
+
